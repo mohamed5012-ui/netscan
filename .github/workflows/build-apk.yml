@@ -46,8 +46,9 @@ jobs:
           PIP_CONSTRAINT: ${{ github.workspace }}/android/pip-constraints.txt
         run: |
           export APP_ANDROID_ACCEPT_SDK_LICENSE=1
-          set -o pipefail
-          yes | buildozer android debug 2>&1 | tee /tmp/build.log
+          # ناخد كود خروج buildozer نفسه (مش tee ولا yes) عشان SIGPIPE ميضللناش
+          buildozer android debug 2>&1 | tee /tmp/build.log
+          exit ${PIPESTATUS[0]}
 
       - name: نشر اللوج (حتى عند الفشل)
         if: always()

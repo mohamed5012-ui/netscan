@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- أيقونة بسيطة: دوائر رادار بلون تركوازي على خلفية داكنة -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+
+    <path
+        android:fillColor="#0A0E14"
+        android:pathData="M0,0h108v108h-108z" />
+    <path
+        android:fillColor="#2DD4BF"
+        android:pathData="M54,54m-34,0a34,34 0,1 1,68 0a34,34 0,1 1,-68 0"
+        android:fillAlpha="0.12" />
+    <path
+        android:strokeColor="#2DD4BF"
+        android:strokeWidth="4"
+        android:fillColor="#00000000"
+        android:pathData="M54,54m-30,0a30,30 0,1 1,60 0a30,30 0,1 1,-60 0" />
+    <path
+        android:strokeColor="#15B8A6"
+        android:strokeWidth="4"
+        android:fillColor="#00000000"
+        android:pathData="M54,54m-16,0a16,16 0,1 1,32 0a16,16 0,1 1,-32 0" />
+    <path
+        android:fillColor="#2DD4BF"
+        android:pathData="M54,54m-6,0a6,6 0,1 1,12 0a6,6 0,1 1,-12 0" />
+    <path
+        android:strokeColor="#2DD4BF"
+        android:strokeWidth="5"
+        android:strokeLineCap="round"
+        android:pathData="M54,54L78,30" />
+</vector>

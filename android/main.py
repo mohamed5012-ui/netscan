@@ -11,12 +11,37 @@
 """
 
 import os
+import sys
 import socket
 import ipaddress
 import threading
 import errno
 import time
 import gzip
+import traceback
+
+
+# ---- مصيدة الأخطاء: تكتب أي كراش في ملف يسهل الوصول له ----
+def _dump_error(text):
+    for p in ("/sdcard/Download/netscan_error.txt",
+              "/storage/emulated/0/Download/netscan_error.txt",
+              os.path.join(os.path.dirname(os.path.abspath(__file__)), "netscan_error.txt")):
+        try:
+            with open(p, "w", encoding="utf-8") as f:
+                f.write(text)
+        except Exception:
+            continue
+
+
+def _excepthook(etype, value, tb):
+    try:
+        _dump_error("".join(traceback.format_exception(etype, value, tb)))
+    except Exception:
+        pass
+    sys.__excepthook__(etype, value, tb)
+
+
+sys.excepthook = _excepthook
 
 from kivy.app import App
 from kivy.clock import Clock
@@ -45,11 +70,19 @@ except Exception:
     def ar(t):
         return str(t)
 
-FONT = "Cairo"
-_ff = os.path.join(os.path.dirname(os.path.abspath(__file__)), "Cairo.ttf")
-if os.path.exists(_ff):
-    LabelBase.register(name=FONT, fn_regular=_ff)
-else:
+FONT = "Roboto"
+try:
+    _dir = os.path.dirname(os.path.abspath(__file__))
+    _reg = os.path.join(_dir, "Cairo.ttf")
+    _bold = os.path.join(_dir, "Cairo-Bold.ttf")
+    if os.path.exists(_reg):
+        LabelBase.register(
+            name="Cairo",
+            fn_regular=_reg,
+            fn_bold=_bold if os.path.exists(_bold) else _reg,
+        )
+        FONT = "Cairo"
+except Exception:
     FONT = "Roboto"
 
 BG = (0.059, 0.090, 0.165, 1)
@@ -448,8 +481,31 @@ class Root(BoxLayout):
 class NetScanApp(App):
     def build(self):
         self.title = "netscan"
-        return Root()
+        try:
+            return Root()
+        except Exception:
+            # بدل ما التطبيق يقفل، نعرض الخطأ على الشاشة ونكتبه في ملف
+            tb = traceback.format_exc()
+            _dump_error(tb)
+            from kivy.uix.scrollview import ScrollView as _SV
+            from kivy.uix.label import Label as _L
+            sv = _SV()
+            lbl = _L(text="خطأ عند بدء التشغيل:\n\n" + tb,
+                     halign="left", valign="top", font_size=dp(12),
+                     color=(1, 0.8, 0.8, 1), size_hint_y=None, padding=(dp(10), dp(10)))
+            lbl.bind(texture_size=lambda *a: setattr(lbl, "height", lbl.texture_size[1] + dp(20)),
+                     width=lambda *a: setattr(lbl, "text_size", (lbl.width - dp(20), None)))
+            sv.add_widget(lbl)
+            return sv
+
+
+def main():
+    try:
+        NetScanApp().run()
+    except Exception:
+        _dump_error(traceback.format_exc())
+        raise
 
 
 if __name__ == "__main__":
-    NetScanApp().run()
+    main()

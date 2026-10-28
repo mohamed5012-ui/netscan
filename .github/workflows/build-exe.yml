@@ -1,0 +1,44 @@
+name: بناء ملف الويندوز (EXE)
+
+on:
+  push:
+    branches: [ main, master ]
+  workflow_dispatch:   # يسمح بالتشغيل اليدوي من تبويب Actions
+
+jobs:
+  build-windows:
+    runs-on: windows-latest
+
+    steps:
+      - name: جلب الكود
+        uses: actions/checkout@v4
+
+      - name: تجهيز بايثون
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: تثبيت المكتبات
+        run: pip install pyinstaller openpyxl
+
+      - name: نسخ المحرّك وقاعدة الشركات بجانب الواجهة
+        shell: bash
+        run: |
+          cp core/scanner.py desktop/scanner.py
+          cp core/vendors.gz desktop/vendors.gz
+          ls -la desktop/
+
+      - name: بناء الـ EXE
+        working-directory: desktop
+        run: >
+          pyinstaller --onefile --windowed --name netscan
+          --add-data "vendors.gz;."
+          --hidden-import openpyxl
+          app.py
+
+      - name: رفع الملف الناتج
+        uses: actions/upload-artifact@v4
+        with:
+          name: netscan-windows-exe
+          path: desktop/dist/netscan.exe
+          if-no-files-found: error

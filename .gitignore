@@ -1,0 +1,22 @@
+# بايثون
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+venv/
+
+# مخرجات البناء
+build/
+dist/
+*.spec.bak
+desktop/manuf
+
+# Buildozer
+android/.buildozer/
+android/bin/
+*.apk
+*.exe
+
+# أنظمة التشغيل
+.DS_Store
+Thumbs.db

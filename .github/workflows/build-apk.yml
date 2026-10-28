@@ -1,0 +1,28 @@
+name: بناء تطبيق الأندرويد (APK)
+
+on:
+  push:
+    branches: [ main, master ]
+  workflow_dispatch:   # يسمح بالتشغيل اليدوي من تبويب Actions
+
+jobs:
+  build-android:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: جلب الكود
+        uses: actions/checkout@v4
+
+      - name: بناء الـ APK بـ Buildozer
+        uses: ArtemSBulgakov/buildozer-action@v1
+        id: buildozer
+        with:
+          workdir: android
+          buildozer_version: stable
+
+      - name: رفع الملف الناتج
+        uses: actions/upload-artifact@v4
+        with:
+          name: netscan-android-apk
+          path: ${{ steps.buildozer.outputs.filename }}
+          if-no-files-found: error

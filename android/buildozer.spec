@@ -7,7 +7,7 @@ source.include_exts = py,ttf,gz
 version = 1.0
 
 # المكتبات المطلوبة لبناء التطبيق
-requirements = python3,kivy==2.3.0,arabic_reshaper,python-bidi
+requirements = python3,kivy==2.3.0,arabic_reshaper==3.0.0,python-bidi==0.4.2
 
 orientation = portrait
 fullscreen = 0

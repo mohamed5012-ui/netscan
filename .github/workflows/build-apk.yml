@@ -38,7 +38,22 @@ jobs:
         working-directory: android
         run: |
           export APP_ANDROID_ACCEPT_SDK_LICENSE=1
-          yes | buildozer android debug
+          set -o pipefail
+          yes | buildozer android debug 2>&1 | tee /tmp/build.log
+
+      - name: نشر اللوج (حتى عند الفشل)
+        if: always()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p /tmp/logs
+          tail -c 300000 /tmp/build.log > /tmp/logs/build.log 2>/dev/null || echo "no build.log" > /tmp/logs/build.log
+          cd /tmp/logs
+          git init -q
+          git checkout -q -b bin-log
+          git add build.log
+          git -c user.name=ci -c user.email=ci@users.noreply.github.com commit -qm "build log"
+          git push -f "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" bin-log || true
 
       - name: نشر الـ APK في فرع bin-apk
         env:

@@ -3,7 +3,10 @@ name: بناء ملف الويندوز (EXE)
 on:
   push:
     branches: [ main, master ]
-  workflow_dispatch:   # يسمح بالتشغيل اليدوي من تبويب Actions
+  workflow_dispatch:
+
+permissions:
+  contents: write
 
 jobs:
   build-windows:
@@ -36,7 +39,21 @@ jobs:
           --hidden-import openpyxl
           app.py
 
-      - name: رفع الملف الناتج
+      - name: نشر الـ EXE في فرع bin-win
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p /tmp/out
+          cp desktop/dist/netscan.exe /tmp/out/netscan.exe
+          cd /tmp/out
+          git init -q
+          git checkout -q -b bin-win
+          git add netscan.exe
+          git -c user.name=ci -c user.email=ci@users.noreply.github.com commit -qm "exe build"
+          git push -f "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" bin-win
+
+      - name: رفع الملف الناتج (artifact)
         uses: actions/upload-artifact@v4
         with:
           name: netscan-windows-exe

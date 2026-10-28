@@ -3,26 +3,61 @@ name: بناء تطبيق الأندرويد (APK)
 on:
   push:
     branches: [ main, master ]
-  workflow_dispatch:   # يسمح بالتشغيل اليدوي من تبويب Actions
+  workflow_dispatch:
+
+permissions:
+  contents: write
 
 jobs:
   build-android:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
 
     steps:
       - name: جلب الكود
         uses: actions/checkout@v4
 
-      - name: بناء الـ APK بـ Buildozer
-        uses: ArtemSBulgakov/buildozer-action@v1
-        id: buildozer
+      - name: تجهيز بايثون
+        uses: actions/setup-python@v5
         with:
-          workdir: android
-          buildozer_version: stable
+          python-version: "3.11"
 
-      - name: رفع الملف الناتج
+      - name: تثبيت متطلبات النظام
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            git zip unzip openjdk-17-jdk autoconf libtool pkg-config \
+            zlib1g-dev libncurses5-dev libncursesw5-dev libtinfo5 \
+            cmake libffi-dev libssl-dev build-essential ccache wget
+
+      - name: تثبيت buildozer
+        run: |
+          pip install --upgrade pip
+          pip install "cython==0.29.36" buildozer
+
+      - name: بناء الـ APK
+        working-directory: android
+        run: |
+          export APP_ANDROID_ACCEPT_SDK_LICENSE=1
+          yes | buildozer android debug
+
+      - name: نشر الـ APK في فرع bin-apk
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          APK=$(find android/bin -name "*.apk" | head -1)
+          echo "APK = $APK"
+          mkdir -p /tmp/out
+          cp "$APK" /tmp/out/netscan.apk
+          cd /tmp/out
+          git init -q
+          git checkout -q -b bin-apk
+          git add netscan.apk
+          git -c user.name=ci -c user.email=ci@users.noreply.github.com commit -qm "apk build"
+          git push -f "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" bin-apk
+
+      - name: رفع الملف الناتج (artifact)
         uses: actions/upload-artifact@v4
         with:
           name: netscan-android-apk
-          path: ${{ steps.buildozer.outputs.filename }}
+          path: android/bin/*.apk
           if-no-files-found: error

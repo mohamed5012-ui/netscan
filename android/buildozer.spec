@@ -22,6 +22,9 @@ android.ndk = 25b
 android.archs = arm64-v8a,armeabi-v7a
 android.accept_sdk_license = True
 
+# تثبيت نسخة python-for-android مستقرة من git (تبني Python 3.11 بدل 3.14)
+p4a.branch = v2024.01.21
+
 # أيقونة افتراضية (Kivy بيحط أيقونة تلقائية لو مش محددة)
 # icon.filename = %(source.dir)s/icon.png
 

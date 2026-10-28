@@ -31,10 +31,13 @@ jobs:
 
       - name: تثبيت buildozer (نسخ مستقرة مجرّبة)
         run: |
-          pip install "cython==0.29.36" "buildozer==1.5.0" "python-for-android==2024.1.21"
+          pip install "cython==0.29.36" "buildozer==1.5.0"
 
       - name: بناء الـ APK
         working-directory: android
+        env:
+          # نمنع pip الجديد (26+) اللي بيكسر p4a، ونقفله على نسخة أقدم
+          PIP_CONSTRAINT: ${{ github.workspace }}/android/pip-constraints.txt
         run: |
           export APP_ANDROID_ACCEPT_SDK_LICENSE=1
           set -o pipefail

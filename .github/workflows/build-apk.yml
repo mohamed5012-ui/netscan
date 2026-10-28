@@ -21,6 +21,12 @@ jobs:
         with:
           python-version: "3.11"
 
+      - name: تجهيز Java 17 (مطلوب لـ Gradle)
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
       - name: تثبيت متطلبات النظام
         run: |
           sudo apt-get update
